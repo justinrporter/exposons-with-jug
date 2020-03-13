@@ -1,0 +1,16 @@
+{
+	"test": {
+		"trajectories": [
+			"/Users/jrporter/projects/sim-consulting/trajectories/trj_gen001_kid001.xtc",
+			"/Users/jrporter/projects/sim-consulting/trajectories/trj_gen002_kid002.xtc",
+			"/Users/jrporter/projects/sim-consulting/trajectories/trj_gen003_kid003.xtc",
+			"/Users/jrporter/projects/sim-consulting/trajectories/trj_gen004_kid004.xtc"
+		],
+		"topology": "/Users/jrporter/projects/sim-consulting/trajectories/prot_masses.pdb",
+		"cluster_radii": ["3.0"],
+		"cluster_distance_metric": "euclidean",
+		"lag_time": 150,
+		"model_cluster_radius": "3.0",
+		"kmedoids_updates": 10
+	}
+}
