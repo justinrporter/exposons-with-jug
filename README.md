@@ -1,5 +1,7 @@
 # Jug-ified Exposons Pipleine
 
+![A schematic of the exposons pipeline](https://ars.els-cdn.com/content/image/1-s2.0-S0006349519300530-gr1_lrg.jpg)
+
 Using the library [jug](https://github.com/luispedro/jug), I've created a parallel execution framework for computing exposons on large datasets (really the type of dataset they're most useful for).
 
 ## Installation
