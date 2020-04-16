@@ -66,11 +66,11 @@ That'll print something that looks like:
 
 ```
  Failed    Waiting      Ready   Complete     Active  Task name
-----------------------------------------------------------------------------------------------
-      0          1          0          0          0  lib.tasks.assemble_sasa_h5
-      0          4          0          0          0  lib.tasks.condense_sparse_sidechain_sasas
-      0          0          4          0          0  lib.tasks.map_sasa_sparse
-..............................................................................................
+-----------------------------------------------------------------------------------------------------
+      0          1          0          0          0  libexposon.tasks.assemble_sasa_h5
+      0          4          0          0          0  libexposon.tasks.condense_sparse_sidechain_sasas
+      0          0          4          0          0  libexposon.tasks.map_sasa_sparse
+.....................................................................................................
       0          5          4          0          0  Total
 ```
 
@@ -86,7 +86,7 @@ To run the pipeline serially, you can just run
 jug execute sasa-msms.py
 ```
 
-This will load each task (first `lib.tasks.map_sasa_sparse`), execute it, then write the result to disk, and start with the next task. This will continue until there are no more tasks to run.
+This will load each task (first `libexposon.tasks.map_sasa_sparse`), execute it, then write the result to disk, and start with the next task. This will continue until there are no more tasks to run.
 
 The magic to jug is that you can run tasks in parallel though! So, for instance, with [GNU Parallel](https://www.gnu.org/software/parallel/) you could run:
 
@@ -102,43 +102,43 @@ The reason to execute the tasks one-by-one is that you can apply the correct res
 
 The tasks in the pipeline are:
 
-- `lib.tasks.map_sasa_sparse` - compute the SASA of each atom in each trajectory and store the result as a sparse, compressed array (`npz` format). Parallelization uses `OMP_NUM_THREADS`, typically all availiable on linux, or 1 on macos (since clang doesn't support openmp).
-- `lib.tasks.condense_sparse_sidechain_sasas` - condense the SASA of each atom into a single SASA for each residue, threads used: 1.
-- `lib.tasks.assemble_sasa_h5` - combine each trajectory's residue SASA into a single `enspara` `RaggedArray`.
-- `lib.tasks.cluster_features` - use k-medoids to cluster the set of 
-- `lib.tasks.implied_timescales` - compute implied timescales plots. Parallelization uses `OMP_NUM_THREADS`, typically all availiable on linux, or 1 on macos (since clang doesn't support openmp).
-- `lib.tasks.write_struct_ctrs` - write each center structure (from `cluster_features`) to a single trajectory on disk.
+- `libexposon.tasks.map_sasa_sparse` - compute the SASA of each atom in each trajectory and store the result as a sparse, compressed array (`npz` format). Parallelization uses `OMP_NUM_THREADS`, typically all availiable on linux, or 1 on macos (since clang doesn't support openmp).
+- `libexposon.tasks.condense_sparse_sidechain_sasas` - condense the SASA of each atom into a single SASA for each residue, threads used: 1.
+- `libexposon.tasks.assemble_sasa_h5` - combine each trajectory's residue SASA into a single `enspara` `RaggedArray`.
+- `libexposon.tasks.cluster_features` - use k-medoids to cluster the set of 
+- `libexposon.tasks.implied_timescales` - compute implied timescales plots. Parallelization uses `OMP_NUM_THREADS`, typically all availiable on linux, or 1 on macos (since clang doesn't support openmp).
+- `libexposon.tasks.write_struct_ctrs` - write each center structure (from `cluster_features`) to a single trajectory on disk.
 
 Depending on the task, on a high-performance computing clusters with slurm, I start with the following:
 
 ```bash
-sbatch --array=0-9 --job-name sasa --exclusive --mem 8G --wrap 'jug execute sasa-msms.py --aggressive-unload --target lib.tasks.map_sasa_sparse'
+sbatch --array=0-9 --job-name sasa --exclusive --mem 8G --wrap 'jug execute sasa-msms.py --aggressive-unload --target libexposon.tasks.map_sasa_sparse'
 ```
 
-This asks for 10 (`--array-0-9`) full (`--exclusive`) nodes each with 8GB (`--mem 8G`) or more or memory. Each will load one of the `lib.tasks.map_sasa_sparse` tasks, run it, and save the result, and then purge the result from memory (`--aggressive-unload`).
+This asks for 10 (`--array-0-9`) full (`--exclusive`) nodes each with 8GB (`--mem 8G`) or more or memory. Each will load one of the `libexposon.tasks.map_sasa_sparse` tasks, run it, and save the result, and then purge the result from memory (`--aggressive-unload`).
 
-Then, because it's pretty low-compute, I'll do something like this for `lib.tasks.condense_sparse_sidechain_sasas` :
+Then, because it's pretty low-compute, I'll do something like this for `libexposon.tasks.condense_sparse_sidechain_sasas` :
 
 ```bash
-parallel -N0 nice jug execute sasa-msms.py  --target lib.tasks.condense_sparse_sidechain_sasas --aggressive-unload ::: {1..8}
+parallel -N0 nice jug execute sasa-msms.py  --target libexposon.tasks.condense_sparse_sidechain_sasas --aggressive-unload ::: {1..8}
 ```
 
-There's only one `lib.tasks.assemble_sasa_h5` job per target, so that's easy:
+There's only one `libexposon.tasks.assemble_sasa_h5` job per target, so that's easy:
 
 ```bash
-jug execute sasa-msms.py --target lib.tasks.assemble_sasa_h5
+jug execute sasa-msms.py --target libexposon.tasks.assemble_sasa_h5
 ```
 
 Clustering is a bit more complicated. If you want to use more than one node (with MPI) you need MPI installed (e.g. MPICH) as well as `mpi4py`, which isn't installed by default in `requriements.txt`. If you don't need MPI, queue your clustering job with something like:
 
 ```bash
-sbatch --job-name exposon-cluster --exclusive --wrap 'jug execute sasa-msms.py --target lib.tasks.cluster_features'
+sbatch --job-name exposon-cluster --exclusive --wrap 'jug execute sasa-msms.py --target libexposon.tasks.cluster_features'
 ```
 
 if you're using MPI, you can say something like:
 
 ```bash
-sbatch --job-name exposon-cluster --exclusive --nodes=4 --cpus-per-task 24 --wrap 'jug execute sasa-msms.py --target lib.tasks.cluster_features'
+sbatch --job-name exposon-cluster --exclusive --nodes=4 --cpus-per-task 24 --wrap 'jug execute sasa-msms.py --target libexposon.tasks.cluster_features'
 ```
 
 to ask for 4 nodes (`--nodes=4`) with 24 cores each (`--cpus-per-task 24`). This will, of course, differ based on your queueing system
