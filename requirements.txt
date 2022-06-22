@@ -8,7 +8,7 @@ kiwisolver==1.1.0
 matplotlib==3.2.0
 https://github.com/mdtraj/mdtraj@e5445149d0c9843cf1a2d49737c4d7288daa9e69
 numexpr==2.7.1
-numpy==1.18.1
+numpy==1.22.0
 pandas==1.0.1
 psutil==5.7.0
 pyparsing==2.4.6
