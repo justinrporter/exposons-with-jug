@@ -2,7 +2,7 @@ astor==0.8.1
 cycler==0.10.0
 Cython==0.29.15
 enspara==0.1.1rc58
-joblib==0.14.1
+joblib==1.2.0
 Jug==2.0.0
 kiwisolver==1.1.0
 matplotlib==3.2.0
