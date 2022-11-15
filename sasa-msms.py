@@ -3,8 +3,8 @@ import json
 
 import jug
 
-from lib.pipeline import featurize, cluster
-from lib.tasks import msm2file
+from libexposon.pipeline import featurize, cluster
+from libexposon.tasks import msm2file
 
 
 with open(os.path.join(os.path.dirname(__file__),
